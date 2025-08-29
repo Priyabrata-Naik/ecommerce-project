@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-service
+spec:
+  selector:
+    matchLabels:
+      app: order-service
+  template:
+    metadata:
+      labels:
+        app: order-service
+    spec:
+      containers:
+      - name: order-service
+        image: priyabrata2000/ecommerce-order-service
+        resources:
+          limits:
+            memory: "400Mi"
+            cpu: "200m"
+          requests:
+            memory: "200Mi"
+            cpu: "100m"
+        env:
+          - name: SPRING_PROFILES_ACTIVE
+            value: k8s
+          - name: "DB_USER"
+            valueFrom:
+              secretKeyRef:
+                name: my-secret
+                key: ORDER_DB_USER  
+          - name: "DB_PASSWORD"
+            valueFrom:
+              secretKeyRef:
+                name: my-secret
+                key: ORDER_DB_PASSWORD
+          - name: "DB_SERVICE"
+            valueFrom:
+              configMapKeyRef:
+                name: my-config
+                key: ORDER_DB_SERVICE
+        ports:
+        - containerPort: 9020
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: order-service
+spec:
+  selector:
+    app: order-service
+  ports:
+  - port: 80
+    targetPort: 9020
+
+        

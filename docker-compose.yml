@@ -1,0 +1,95 @@
+version: "3.8"
+
+services:
+  zipkin:
+    image: openzipkin/zipkin:latest
+    container_name: zipkin
+    ports:
+      - "9411:9411"
+    networks:
+      - ecommerce-network
+
+  order-db:
+    image: postgres
+    container_name: order-db
+    environment:
+      - POSTGRES_DB=orderDB
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=shark
+    networks:
+      - ecommerce-network
+    volumes:
+      - order-db-data:/var/lib/postgresql/data
+
+  inventory-db:
+    image: postgres
+    container_name: inventory-db
+    environment:
+      - POSTGRES_DB=inventoryDB
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=shark
+    networks:
+      - ecommerce-network
+    volumes:
+      - inventory-db-data:/var/lib/postgresql/data
+
+  discovery-service:
+    image: priyabrata2000/discovery-service
+    container_name: discovery-service
+#    environment:
+#      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8761/eureka
+    networks:
+      - ecommerce-network
+    ports:
+      - "8767:8761"
+
+  config-server:
+    image: priyabrata2000/config-server
+    container_name: config-server
+    networks:
+      - ecommerce-network
+    depends_on:
+      - discovery-service
+    ports:
+      - "8889:8888"
+
+  inventory-service:
+    image: priyabrata2000/inventory-service
+    container_name: inventory-service
+    networks:
+      - ecommerce-network
+    depends_on:
+      - config-server
+      - zipkin
+      - inventory-db
+
+  order-service:
+    image: priyabrata2000/order-service
+    container_name: order-service
+    networks:
+      - ecommerce-network
+    depends_on:
+      - config-server
+      - zipkin
+      - order-db
+
+  api-gateway:
+    image: priyabrata2000/api-gateway
+    container_name: api-gateway
+    networks:
+      - ecommerce-network
+    depends_on:
+      - config-server
+      - inventory-service
+      - order-service
+    ports:
+      - "8080:8080"
+
+volumes:
+  order-db-data:
+  inventory-db-data:
+
+networks:
+  ecommerce-network:
+
+

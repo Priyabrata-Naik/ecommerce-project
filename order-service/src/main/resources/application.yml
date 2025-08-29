@@ -1,0 +1,29 @@
+spring.application.name: order-service
+
+#spring:
+#  cloud:
+#    config:
+#      discovery:
+#        enabled: true
+#        service-id: config-server
+#      fail-fast: true
+
+
+spring.config.import: configserver:http://config-server:8888
+
+#spring.profiles.active=dev
+
+#server.servlet.context-path=/orders
+#server.port=9020
+#
+#spring.datasource.url = jdbc:postgresql://localhost:5432/orderDB
+#spring.datasource.username= postgres
+#spring.datasource.password= shark
+#
+#spring.jpa.hibernate.ddl-auto= create-drop
+#spring.jpa.show-sql=true
+#spring.jpa.properties.hibernate.format_sql = true
+#
+##spring.jpa.defer-datasource-initialization=true
+##spring.sql.init.mode=ALWAYS
+##spring.sql.init.data-locations=classpath:data.sql
